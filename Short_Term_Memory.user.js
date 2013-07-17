@@ -4,7 +4,6 @@
 // @description Saves last unloaded page for quick review.
 // @include     *
 // @version     1
-// @grant       GM_log
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @grant       GM_registerMenuCommand
@@ -22,6 +21,5 @@ window.addEventListener("unload", function()
 	var base = window.location.href;
 	base = base.substring(0,base.lastIndexOf('/'));
 	GM_setValue('head', document.head.innerHTML+"<base href='"+base+"'>");
-	GM_log(GM_getValue('head'));
 	GM_setValue('body', document.body.innerHTML);
 }, false);
