@@ -7,6 +7,10 @@ Short Term Memory
 ------
 Not only for ii, should also be usefull other places. Stores previous page for viewing with *Greasemonkey > User Script Commands > View previous page*.
 
+ii-sniffer
+------
+Detects when a crate sniffer is used and darkens map squares with possible crates removing squares already visited.
+
 ii-advanced-game-map
 ------
 Adds note takeing and filtering to the ii game map.
