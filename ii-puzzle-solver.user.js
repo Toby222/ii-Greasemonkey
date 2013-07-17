@@ -5,6 +5,10 @@
 // @include     http://improbableisland.com/*
 // @include     http://www.improbableisland.com/*
 // @version     2.0
+// @grant       GM_log
+// @grant       GM_setValue
+// @grant       GM_getValue
+// @grant       GM_xmlhttpRequest
 // ==/UserScript==
 
 /*
@@ -52,6 +56,9 @@ else if (parseInt(input) == 0)
 				stun += " - "+reply[i].v;
 
 			var insert = document.evaluate("//text()[contains(.,'???')]", document, null, XPathResult.ANY_TYPE, null).iterateNext();
+			if (!insert)
+				insert = document.evaluate("//text()[contains(.,'No combo moves found yet...')]", document, null, XPathResult.ANY_TYPE, null).iterateNext();
+
 			insert.parentNode.insertBefore(document.createTextNode(stun), insert.nextSibling);
 		}
 	});
