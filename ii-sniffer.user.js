@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name        ii-snifer
+// @name        ii-sniffer
 // @namespace   http://redhatter.github.com
-// @description Show snifer range on map.
+// @description Show sniffer range on map.
 // @include     http://*improbableisland.com/*
 // @version     1
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js
