@@ -5,7 +5,6 @@
 // @include     http://improbableisland.com/*
 // @include     http://www.improbableisland.com/*
 // @version     2.0
-// @grant       GM_log
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @grant       GM_xmlhttpRequest
@@ -37,8 +36,6 @@ for (var i = 0; i < arms.snapshotLength; i++)
 	}
 }
 
-GM_log(GM_getValue('prv'));
-
 if (input == '')
 	return
 else if (parseInt(input) == 0)
@@ -49,7 +46,6 @@ else if (parseInt(input) == 0)
 		url: 	query = 'https://spreadsheets.google.com/tq?tq=select%20L,M,N,O,P%20where%20A%3D"'+GM_getValue('name')+'"&key=0AtPkUdingtHEdFUzLWN0a3dkNDlyT09HNjVsNjg2ZXc',
 		onload: function(response)
 		{
-			GM_log(response.responseText.slice(62,response.responseText.length-2));
 			reply = JSON.parse(response.responseText.slice(62,response.responseText.length-2)).table.rows[0].c;
 			var stun = '';
 			for(var i=0; i<reply.length; i++)
@@ -108,14 +104,11 @@ if (name == "Lion")
 	query = 'https://spreadsheets.google.com/tq?tq=select%20C,D,E,F,G,H,I,J,K%20where%20A%3D"'+name+'"&key=0AtPkUdingtHEdFUzLWN0a3dkNDlyT09HNjVsNjg2ZXc';
 }
 
-GM_log(name);
-
 var solve = document.createElement('input');
 solve.type = 'button';
 solve.value = 'Solve';
 solve.addEventListener("click", function()
 {
-	GM_log(input);
 	var toggles = [];
 	for (var i=0; i<input.length; i++)
 	{
@@ -150,7 +143,6 @@ if(GM_getValue('name') != name)
 		url: query,
 		onload: function(response)
 		{
-			GM_log(response.responseText.slice(62,response.responseText.length-2));
 			reply = JSON.parse(response.responseText.slice(62,response.responseText.length-2)).table.rows[0].c;
 			for(var i=0; i<reply.length; i++)
 			{
@@ -247,10 +239,8 @@ function combinations (array,test,filter)
 	}
 
 	for(var i=0; i<array.length; i++)
-	{
-		GM_log(i);
-		if(loop(0,i,0)) {GM_log('found');break;}
-	}
+		if(loop(0,i,0))
+			break;
 
 	return result;
 }
