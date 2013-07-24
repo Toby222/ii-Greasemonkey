@@ -34,7 +34,9 @@ $('#stat_buffs span:not(.colDkWhite)').each(function ()
 		if ($(this).text().indexOf(buff[1]) > -1)
 			$(this).prepend(buff[2]);
 });
-GM_setValue('buffs',buffs);
+
+if (buffs)
+	GM_setValue('buffs',buffs);
 
 var dmp = new diff_match_patch();
 var diffs = dmp.diff_main(buffs, old);
@@ -56,14 +58,14 @@ var text = "";
 
 if (end != "")
 	text = "These buffs have ended: \n"+end;
-	
+
 if (begun != "")
 	text = "\nThese buffs have begun: \n"+begun;
 
 if (text != "")
 	alert(text)
-	
+
 if (window.location.href.indexOf('op=bartender') > -1)
 	for (let buff of buffList)
-		if (buffs.indexOf(buff[1]) == -1)
-			$('a:contains('+buff[0]+')').css('font-weight', bold);
+		if (buff[0] && buffs.indexOf(buff[1]) == -1)
+			$('a:contains("'+buff[0]+'")').css('font-weight', 'bold');

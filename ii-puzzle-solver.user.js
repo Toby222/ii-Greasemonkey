@@ -1,9 +1,8 @@
 // ==UserScript==
 // @name        ii-puzzle-solver
-// @namespace   http://redhatter.gethub.com
+// @namespace   http://RedHatter.gethub.com
 // @description Solves for puzzle combat.
-// @include     http://improbableisland.com/*
-// @include     http://www.improbableisland.com/*
+// @include     http://*improbableisland.com/*
 // @version     2.0
 // @grant       GM_setValue
 // @grant       GM_getValue
@@ -13,8 +12,8 @@
 /*
  * 1 = orange
  * 0 = green
-  *
  */
+
 var input = '';
 var filter = '';
 
