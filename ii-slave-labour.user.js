@@ -16,10 +16,19 @@ var actions = [
 	["Refresh booze", "Return to Squat Hole",
 		["Return to Squat Hole", "Booz", "Chlamydia", "Mudwisearse", "Return to the lounge", "Chlamydia", "Wanker", "Back to Squat Hole", "Jungle"]
 	],
+	["Refresh booze", "Return to Improbable Central",
+		["Return to Improbable Central", "The Prancing SpiderKitty", "Talk to Dan the Landlord", "Ale", "Return to Improbable Central", "Jungle"]
+	],
 	["Deposit Req", "Return to",
 		["Return to", "Bank of Improbable", "Deposit", function () {$('input[type=submit]').click();}, "Return to", "Jungle"]
 	]
 ];
+
+var auto = [
+	// Conditional link
+//	"Pick up SneezeRoot",
+//	"Pick up TwitchLeaf",
+]
 
 actions.forEach(function(action, index)
 {
@@ -31,6 +40,13 @@ actions.forEach(function(action, index)
 			window.location = window.location;
 		});
 });
+
+for (let action of auto)
+{
+	var link = $('a:contains("'+action+'")');
+	if (link.length > 0)
+		window.location.href = link.attr('href');
+}
 
 traverse();
 
