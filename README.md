@@ -5,11 +5,15 @@ A set of greasemonkey scripts made for Improbable Island.
 
 Short Term Memory
 ------
-Not only for ii, should also be usefull other places. Stores previous page for viewing with *Greasemonkey > User Script Commands > View previous page*.
+Not only for ii, should also be useful other places. Stores previous page for viewing with *Greasemonkey > User Script Commands > View previous page*.
 
 ii-bartender
 ------
 Monitors buffs and shows an alert when they have changed.
+
+ii-slave-labour
+------
+Automates actions. Currently included: refresh buffs, and deposit req.
 
 ii-sniffer
 ------
@@ -17,7 +21,7 @@ Detects when a crate sniffer is used and darkens map squares with possible crate
 
 ii-advanced-game-map
 ------
-Adds note takeing and filtering to the ii game map.
+Adds note taking and filtering to the ii game map.
 
 ii-battle-timer
 ------
