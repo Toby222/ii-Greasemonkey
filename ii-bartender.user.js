@@ -19,7 +19,11 @@ var buffList = [
 	
 	// Booze
 	["Mudwisearse", "Crappiest Beer Ever", "+5% Atk "],
-	["Wanker", "Wanker", "+30% Atk "]
+	["Wanker", "Wanker", "+30% Atk "],
+	["Cake or Death", "Full Of Cake", "+10% Atk +25% Def "],
+	["Brain Hemorrhage", "Brain Hemorrhage Fuzzies", "+12% Atk "],
+	["Monster Mash", "Monster Mash Grumps", "+20% Atk "],
+	["Special Sauce", "Special Sauce Warmth", "+25% Atk +33% Def"]
 ];
 
 var old = GM_getValue('buffs');
