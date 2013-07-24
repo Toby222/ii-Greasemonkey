@@ -2,7 +2,8 @@
 // @name        ii-puzzle-solver
 // @namespace   http://RedHatter.gethub.com
 // @description Solves for puzzle combat.
-// @include     http://*improbableisland.com/*
+// @include     http://*improbableisland.com/*op=search*
+// @include     http://*improbableisland.com/*op=fight*
 // @version     2.0
 // @grant       GM_setValue
 // @grant       GM_getValue
