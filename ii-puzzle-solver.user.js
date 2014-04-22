@@ -2,11 +2,15 @@
 // @name        ii-puzzle-solver
 // @namespace   http://RedHatter.gethub.com
 // @description Solves for puzzle combat.
+// @require     http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js
 // @include     http://*improbableisland.com/*op=search*
 // @include     http://*improbableisland.com/*op=fight*
+// @include     http://*improbableisland.com/*module=worldmapen*
+// @include     http://*improbableisland.com/badnav.php*
 // @version     2.0
 // @grant       GM_setValue
 // @grant       GM_getValue
+// @grant       GM_deleteValue
 // @grant       GM_xmlhttpRequest
 // ==/UserScript==
 
@@ -15,17 +19,17 @@
  * 0 = green
  */
 
+
+// Build the input and filter strings to represent the arm positions
 var input = '';
 var filter = '';
-
-var arms = document.evaluate("//td/a/div/div", document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-for (var i = 0; i < arms.snapshotLength; i++)
+$("td > a > div > div").each (function (index)
 {
-	if(arms.snapshotItem(i).style.backgroundImage.indexOf('orange') != -1)
+	if ($(this).css ("background-image").indexOf ('orange') != -1)
 	{
 		input += 1;
 		filter += 0;
-	} else if(arms.snapshotItem(i).style.backgroundImage.indexOf('disabled') != -1)
+	} else if ($(this).css ("background-image").indexOf ('disabled') != -1)
 	{
 		input += 0;
 		filter += 1;
@@ -34,202 +38,205 @@ for (var i = 0; i < arms.snapshotLength; i++)
 		input += 0;
 		filter += 0;
 	}
-}
+
+	// Store key press when arm is clicked
+	$(this).click (function ()
+	{
+		GM_setValue ('press',index+1);
+	})
+});
 
 if (input == '')
 	return
-else if (parseInt(input) == 0)
+
+// If input is all zeros (green) than monster is stunned, get stun sequence
+else if (parseInt (input) == 0)
 {
-	var reply;
-	GM_xmlhttpRequest({
-		method: "GET",
-		url: 	query = 'https://spreadsheets.google.com/tq?tq=select%20L,M,N,O,P%20where%20A%3D"'+GM_getValue('name')+'"&key=0AtPkUdingtHEdFUzLWN0a3dkNDlyT09HNjVsNjg2ZXc',
-		onload: function(response)
-		{
-			reply = JSON.parse(response.responseText.slice(62,response.responseText.length-2)).table.rows[0].c;
-			var stun = '';
-			for(var i=0; i<reply.length; i++)
-				stun += " - "+reply[i].v;
+	if (GM_getValue ('stun') == '')
+		GM_xmlhttpRequest ({
+			method: "GET",
+			url: 	query = 'https://spreadsheets.google.com/tq?tq=select%20L,M,N,O,P%20where%20A%3D"'+GM_getValue ('name')+'"&key=0AtPkUdingtHEdFUzLWN0a3dkNDlyT09HNjVsNjg2ZXc',
+			onload: function (response)
+			{
+				var reply = JSON.parse (response.responseText.slice (62,response.responseText.length-2)).table.rows[0].c;
+				var stun = reply[0].v;
+				for (var i = 1; i < reply.length; i++)
+					stun += " - "+reply[i].v;
 
-			var insert = document.evaluate("//text()[contains(.,'???')]", document, null, XPathResult.ANY_TYPE, null).iterateNext();
-			if (!insert)
-				insert = document.evaluate("//text()[contains(.,'No combo moves found yet...')]", document, null, XPathResult.ANY_TYPE, null).iterateNext();
-
-			insert.parentNode.insertBefore(document.createTextNode(stun), insert.nextSibling);
-		}
-	});
+				$(document.createTextNode (stun)).insertBefore ($('div.navhead:contains ("Strike body parts")'));
+				GM_setValue ('stun', stun);
+			}
+		});
+	else
+		$(document.createTextNode (GM_getValue ('stun'))).insertBefore ($('div.navhead:contains ("Strike body parts")'));
 	return;
 }
 
-document.addEventListener('keypress', function(e){if(e.which>48 && e.which<58) GM_setValue('press',e.which-48)},true);
+// Store keypress when a key is pressed
+$(document).keypress (function (e)
+{
+	if (e.which>48 && e.which<58)
+		GM_setValue ('press',e.which-48)
+});
 
-var insert = document.evaluate("//div[contains(text(),'Indiscriminate Flailing')]", document, null, XPathResult.ANY_TYPE, null).iterateNext();
-
+// Create and insert text box for each arm
+var insert = $('div.navhead:contains ("Indiscriminate Flailing")');
 var zero = '';
-
 for (var i=0; i<input.length; i++)
 {
-	element = document.createElement('input');
-	element.type = 'number';
-	element.style.width = '142px';
-	element.style.height = '17px';
-	element.style.margin = '1px 0 1px 5px';
-	element.style.fontFamily = 'monospace';
-	element.id = 'input_'+i;
-	insert.parentNode.insertBefore(element, insert);
+	$("<input type='number' id='input_"+i+"' style='width:142px;height:17px;margin:1px 0 1px 5px;font-family:monospace'>")
+		.insertBefore (insert)
 	zero += '0';
 }
 
-var name = document.evaluate("//div[@id='combatbars']/table[2]/tbody/tr/td/b/text()", document, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-if(name.indexOf('Elite') == 0){name = name.slice(6);}
-else if(name.indexOf('Deadly') == 0){name = name.slice(7);}
-else if(name.indexOf('Lethal') == 0){name = name.slice(7);}
-else if(name.indexOf('Savage') == 0){name = name.slice(7);}
-else if(name.indexOf('Malignant') == 0){name = name.slice(10);}
-else if(name.indexOf('Dangerous') == 0){name = name.slice(10);}
-else if(name.indexOf('Malevolent') == 0){name = name.slice(11);}
+// Extract monster name
+var name = $("div#combatbars > table:last td > b").text ();
+var num = $("div#combatbars > table td > b:contains ("+name+")").length;
 
-var num = document.evaluate("count(//div[@id='combatbars']/table)", document, null, XPathResult.NUMBER_TYPE, null);
-if(num.numberValue-1 > 1)
-	name += ' (x'+(num.numberValue-1)+')';
+if (name.indexOf ('Elite') == 0){name = name.slice (6);}
+else if (name.indexOf ('Deadly') == 0){name = name.slice (7);}
+else if (name.indexOf ('Lethal') == 0){name = name.slice (7);}
+else if (name.indexOf ('Savage') == 0){name = name.slice (7);}
+else if (name.indexOf ('Malignant') == 0){name = name.slice (10);}
+else if (name.indexOf ('Dangerous') == 0){name = name.slice (10);}
+else if (name.indexOf ('Malevolent') == 0){name = name.slice (11);}
 
+if (num > 1)
+	name += ' (x'+num+')';
+
+// Set url for getting monster info from spreadsheet
 var query;
 if (name == "Lion")
 {
-	var level = document.evaluate("//span[contains(text(),'(Level')]/text()", document, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	level = level.slice(8,level.indexOf(')'));
+	level = $('span:contains (" (Level")').text ().slice (8,level.indexOf (')'));
 	query = 'https://spreadsheets.google.com/tq?tq=select%20C,D,E,F,G,H,I,J,K%20where%20A%20contains%20"Lion"%20and%20B='+level+'&key=0AtPkUdingtHEdFUzLWN0a3dkNDlyT09HNjVsNjg2ZXc';
 } else
-{
 	query = 'https://spreadsheets.google.com/tq?tq=select%20C,D,E,F,G,H,I,J,K%20where%20A%3D"'+name+'"&key=0AtPkUdingtHEdFUzLWN0a3dkNDlyT09HNjVsNjg2ZXc';
-}
 
-var solve = document.createElement('input');
-solve.type = 'button';
-solve.value = 'Solve';
-solve.addEventListener("click", function()
-{
-	var toggles = [];
-	for (var i=0; i<input.length; i++)
+// Button for solving puzzle
+var solve = $("<input type='button' value='Solve'>")
+	.insertBefore (insert)
+	.click (function ()
 	{
-		var val = document.getElementById('input_'+i).value;
-		var toggle = val.split(',');
-		var num = zero;
-		for (var a=0; a<toggle.length; a++)
+		var toggles = [];
+		for (var i=0; i<input.length; i++)
 		{
-			num = replaceAt(num, parseInt(toggle[a])-1, '1');
+			var toggle = $("#input_"+i).val ().split (',');
+			var num = zero;
+			for (var a=0; a<toggle.length; a++)
+			{
+				num = replaceAt (num, parseInt (toggle[a])-1, '1');
+			}
+			toggles.push (parseInt (num, 2));
 		}
-		toggles.push(parseInt(num, 2));
-	}
-	solve.value = combinations(toggles, parseInt(input, 2), parseInt(filter, 2));
-	solve.blur();
-}, true);
-insert.parentNode.insertBefore(solve, insert);
+		$(this)
+			.val (combinations (toggles, parseInt (input, 2), parseInt (filter, 2)))
+			.blur ();
+	});
 
-if(GM_getValue('name') != name)
+
+// Set arm combinations ether by memory (if correct) or spreadsheet
+if (GM_getValue ('name') != name)
 {
-	GM_setValue('name',name);
+	GM_setValue ('name',name);
+	GM_setValue ('stun', '');
 
 	var first = true;
 
-	for(var i=0; i<input.length; i++)
+
+	// Remember dummy values to stop null error
+	for (var i=0; i<input.length; i++)
 	{
-		GM_setValue('input_'+i, '0');
+		GM_setValue ('input_'+i, '0');
 	}
 
+	// Get monster info from spreadsheet
 	var reply;
-	GM_xmlhttpRequest({
+	GM_xmlhttpRequest ({
 		method: "GET",
 		url: query,
-		onload: function(response)
+		onload: function (response)
 		{
-			reply = JSON.parse(response.responseText.slice(62,response.responseText.length-2)).table.rows[0].c;
-			for(var i=0; i<reply.length; i++)
+			reply = JSON.parse (response.responseText.slice (62,response.responseText.length-2)).table.rows[0].c;
+			for (var i=0; i<reply.length; i++)
 			{
-				document.getElementById('input_'+i).value = reply[i].v;
-				GM_setValue('input_'+i, reply[i].v);
-				solve.click();
+				$("#input_"+i).val (reply[i].v);
+				GM_setValue ('input_'+i, reply[i].v);
+				solve.click ();
 			}
 		}
 	});
 } else
 {
+	// Set values from memory
 	for (var i=0; i<input.length; i++)
 	{
-		document.getElementById('input_'+i).value = GM_getValue('input_'+i);
+		$('#input_'+i).val (GM_getValue ('input_'+i));
 	}
 	var first = false;
-	solve.click();
+	solve.click ();
 }
 
-element = document.createElement('input');
-element.type = 'button';
-element.value = 'Reset';
-element.addEventListener("click", function(){GM_deleteValue('name');}, true);
-insert.parentNode.insertBefore(element, insert);
+// Create button to reset name
+$("<input type='button' value='Reset'>")
+	.insertBefore (insert)
+	.click (function ()
+	{
+		GM_deleteValue ('name');
+	});
 
-element = document.createElement('div');
-element.style.fontFamily = 'monospace';
-var prv = GM_getValue('prv');
-element.appendChild(document.createTextNode('Previous: '+prv));
-element.appendChild(document.createElement('br'));
-element.appendChild(document.createTextNode(' Current: '));
-var a = document.createElement('a');
-a.appendChild(document.createTextNode(input));
-a.addEventListener("click", function()
-{
-	input = prompt('',input);
-	a.childNodes[0].nodeValue = input;
-}, true);
-element.appendChild(a);
-element.appendChild(document.createElement('br'));
-
-var diff = parseInt(prv,2)^parseInt(input,2);
+// Display info
+var prv = GM_getValue ('prv');
+var diff = parseInt (prv,2)^parseInt (input,2);
 var string = '';
 for (var i=0; i<input.length; i++)
 {
 	var mask = 1 << i;
-	if((diff&mask) == mask)
+	if ((diff&mask) == mask)
 		string = (input.length-i)+','+string;
 }
+string = string.slice (0,string.length-1);
+var press = GM_getValue ('press');
 
-string = string.slice(0,string.length-1);
+$("<div style='font-family:monospace'>Previous: "+prv+"<br>Current : </div>")
+	.append ($("<a>"+input+"</a>").click (function ()
+		{
+			input = prompt ('',input);
+			a.childNodes[0].nodeValue = input;
+		})
+	)
+	.append ($("<br>Differance: "+string+"<br>Pressed: "+press+"<br>"))
+	.insertBefore (insert);
 
-element.appendChild(document.createTextNode('Differance: '+string));
-element.appendChild(document.createElement('br'));
+// Show error if spreadsheet and reality don't match
+if (string != $('#input_'+ (press-1)).val () && !first)
+	$('#input_'+ (press-1)).css ("background-color", "red");
 
-var press = GM_getValue('press');
-element.appendChild(document.createTextNode('Pressed: '+press));
-element.appendChild(document.createElement('br'));
+GM_setValue ('prv',input);
 
-if (string != document.getElementById('input_'+(press-1)).value && !first)
-	document.getElementById('input_'+(press-1)).style.backgroundColor = "red";
-
-insert.parentNode.insertBefore(element, insert);
-GM_setValue('prv',input);
-
+// Search for a working combination by brute force
 function combinations (array,test,filter)
 {
 	var result = [];
 
 	function loop (start,depth,prefix)
 	{
-		for(var i=start; i<array.length; i++)
+		for (var i=start; i<array.length; i++)
 		{
 			var next = prefix^array[i];
 			if (depth > 0)
 			{
-				if (loop(i+1,depth-1,next))
+				if (loop (i+1,depth-1,next))
 				{
-					result.push(i+1);
+					result.push (i+1);
 					return true;
 				}
 			} else
 			{
 				var combo = test^next;
-				if(combo == 0 || (combo&filter) == combo)
+				if (combo == 0 || (combo&filter) == combo)
 				{
-					result.push(i+1);
+					result.push (i+1);
 					return true;
 				}
 			}
@@ -238,14 +245,14 @@ function combinations (array,test,filter)
 		return false;
 	}
 
-	for(var i=0; i<array.length; i++)
-		if(loop(0,i,0))
+	for (var i=0; i<array.length; i++)
+		if (loop (0,i,0))
 			break;
 
 	return result;
 }
 
-function replaceAt(str, index, char)
+function replaceAt (str, index, char)
 {
-      return str.substr(0, index) + char + str.substr(index+char.length);
+      return str.substr (0, index) + char + str.substr (index+char.length);
 }
