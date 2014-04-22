@@ -63,12 +63,12 @@ else if (parseInt (input) == 0)
 				for (var i = 1; i < reply.length; i++)
 					stun += " - "+reply[i].v;
 
-				$(document.createTextNode (stun)).insertBefore ($('div.navhead:contains ("Strike body parts")'));
+				$(document.createTextNode (stun)).insertBefore ($('div.navhead:contains("Strike body parts")'));
 				GM_setValue ('stun', stun);
 			}
 		});
 	else
-		$(document.createTextNode (GM_getValue ('stun'))).insertBefore ($('div.navhead:contains ("Strike body parts")'));
+		$(document.createTextNode (GM_getValue ('stun'))).insertBefore ($('div.navhead:contains("Strike body parts")'));
 	return;
 }
 
@@ -80,18 +80,18 @@ $(document).keypress (function (e)
 });
 
 // Create and insert text box for each arm
-var insert = $('div.navhead:contains ("Indiscriminate Flailing")');
+var insert = $('div.navhead:contains("Indiscriminate Flailing")');
 var zero = '';
 for (var i=0; i<input.length; i++)
 {
-	$("<input type='number' id='input_"+i+"' style='width:142px;height:17px;margin:1px 0 1px 5px;font-family:monospace'>")
+	$("<input type='number' id='input_"+i+"' style='width:142px;height:17px;margin:1px 0 1px 8px;font-family:monospace'>")
 		.insertBefore (insert)
 	zero += '0';
 }
 
 // Extract monster name
 var name = $("div#combatbars > table:last td > b").text ();
-var num = $("div#combatbars > table td > b:contains ("+name+")").length;
+var num = $("div#combatbars > table td > b:contains("+name+")").length;
 
 if (name.indexOf ('Elite') == 0){name = name.slice (6);}
 else if (name.indexOf ('Deadly') == 0){name = name.slice (7);}
@@ -108,13 +108,13 @@ if (num > 1)
 var query;
 if (name == "Lion")
 {
-	level = $('span:contains (" (Level")').text ().slice (8,level.indexOf (')'));
+	level = $('span:contains("(Level")').text ().slice (8,level.indexOf (')'));
 	query = 'https://spreadsheets.google.com/tq?tq=select%20C,D,E,F,G,H,I,J,K%20where%20A%20contains%20"Lion"%20and%20B='+level+'&key=0AtPkUdingtHEdFUzLWN0a3dkNDlyT09HNjVsNjg2ZXc';
 } else
 	query = 'https://spreadsheets.google.com/tq?tq=select%20C,D,E,F,G,H,I,J,K%20where%20A%3D"'+name+'"&key=0AtPkUdingtHEdFUzLWN0a3dkNDlyT09HNjVsNjg2ZXc';
 
 // Button for solving puzzle
-var solve = $("<input type='button' value='Solve'>")
+var solve = $("<input type='button' value='Solve' style='margin-left:8px'>")
 	.insertBefore (insert)
 	.click (function ()
 	{
