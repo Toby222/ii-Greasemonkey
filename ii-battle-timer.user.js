@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        ii-battle-timer
-// @namespace   http://redhatter.gethub.com
+// @namespace   http://RedHatter.github.com
 // @description Inserts a timer for timed commbate.
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js
 // @include     http://improbableisland.com/*

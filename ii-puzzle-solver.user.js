@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        ii-puzzle-solver
-// @namespace   http://RedHatter.gethub.com
+// @namespace   http://RedHatter.github.com
 // @description Solves for puzzle combat.
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js
 // @include     http://*improbableisland.com/*op=search*

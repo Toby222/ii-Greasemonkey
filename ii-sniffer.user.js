@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        ii-sniffer
-// @namespace   http://redhatter.github.com
+// @namespace   http://RedhHtter.github.com
 // @description Show snifsfer range on map.
 // @include     http://*improbableisland.com*
 // @version     1
