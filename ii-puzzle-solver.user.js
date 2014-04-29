@@ -19,7 +19,6 @@
  * 0 = green
  */
 
-
 // Build the input and filter strings to represent the arm positions
 var input = '';
 var filter = '';
@@ -33,6 +32,10 @@ $("td > a > div > div").each (function (index)
 	{
 		input += 0;
 		filter += 1;
+	} else if ($(this).css ("background-image").indexOf ('red') != -1)
+	{
+		input += 'R';
+		filter += 0;
 	} else
 	{
 		input += 0;
@@ -46,31 +49,68 @@ $("td > a > div > div").each (function (index)
 	})
 });
 
-if (input == '')
-	return
+// Display info
+var prv = GM_getValue ('prv');
+var diff = (parseInt (prv,2)^parseInt (input,2));
+var string = '';
+for (var i=0; i<input.length; i++)
+{
+	var mask = 1 << i;
+	if ((diff&mask) == mask)
+		string = (input.length-i)+','+string;
+}
+string = string.slice (0,string.length-1);
+var press = GM_getValue ('press');
+
+
+if (input == '' || input.indexOf ('R') > -1)
+	return;
 
 // If input is all zeros (green) than monster is stunned, get stun sequence
 else if (parseInt (input) == 0)
 {
+	var insert = $("<div style='font-family:monospace'><br>Differance: "+string+"<br>Pressed: "+press+"<br>Stun: </div>").insertBefore ($('div.navhead:contains("Strike body parts")'));
+
 	if (GM_getValue ('stun') == '')
+	{
+		var name = GM_getValue ('name');
+		if (name == "Lion")
+		{
+			var level = $('span:contains("(Level")').text ();
+			level =	level.slice (level.indexOf ('(Level')+7,level.indexOf (')'));
+			query = 'https://spreadsheets.google.com/tq?tq=select%20L,M,N,O,P%20where%20A%20contains%20"Lion"%20and%20B='+level+'&key=0AtPkUdingtHEdFUzLWN0a3dkNDlyT09HNjVsNjg2ZXc';
+		} else
+			query = 'https://spreadsheets.google.com/tq?tq=select%20L,M,N,O,P%20where%20A%3D"'+name+'"&key=0AtPkUdingtHEdFUzLWN0a3dkNDlyT09HNjVsNjg2ZXc';
+
 		GM_xmlhttpRequest ({
 			method: "GET",
-			url: 	query = 'https://spreadsheets.google.com/tq?tq=select%20L,M,N,O,P%20where%20A%3D"'+GM_getValue ('name')+'"&key=0AtPkUdingtHEdFUzLWN0a3dkNDlyT09HNjVsNjg2ZXc',
+			url: query,
 			onload: function (response)
 			{
 				var reply = JSON.parse (response.responseText.slice (62,response.responseText.length-2)).table.rows[0].c;
 				var stun = reply[0].v;
 				for (var i = 1; i < reply.length; i++)
-					stun += " - "+reply[i].v;
+					stun += ","+reply[i].v;
 
-				$(document.createTextNode (stun)).insertBefore ($('div.navhead:contains("Strike body parts")'));
-				GM_setValue ('stun', stun);
+				$(document.createTextNode (stun)).appendTo (insert);
+				if (stun != '')
+					GM_setValue ('stun', stun);
 			}
 		});
-	else
-		$(document.createTextNode (GM_getValue ('stun'))).insertBefore ($('div.navhead:contains("Strike body parts")'));
+	} else
+		$(document.createTextNode (GM_getValue ('stun'))).appendTo (insert);
 	return;
 }
+
+$("<div style='font-family:monospace'>Previous: "+prv+"<br>Current : </div>")
+	.append ($("<a>"+input+"</a>").click (function ()
+		{
+			input = prompt ('',input);
+			a.childNodes[0].nodeValue = input;
+		})
+	)
+	.append ($("<br>Differance: "+string+"<br>Pressed: "+press+"<br>"))
+	.insertBefore ($('div.navhead:contains("Strike body parts")'));
 
 // Store keypress when a key is pressed
 $(document).keypress (function (e)
@@ -108,13 +148,14 @@ if (num > 1)
 var query;
 if (name == "Lion")
 {
-	level = $('span:contains("(Level")').text ().slice (8,level.indexOf (')'));
+	var level = $('span:contains("(Level")').text ();
+	level =	level.slice (level.indexOf ('(Level')+7,level.indexOf (')'));
 	query = 'https://spreadsheets.google.com/tq?tq=select%20C,D,E,F,G,H,I,J,K%20where%20A%20contains%20"Lion"%20and%20B='+level+'&key=0AtPkUdingtHEdFUzLWN0a3dkNDlyT09HNjVsNjg2ZXc';
 } else
 	query = 'https://spreadsheets.google.com/tq?tq=select%20C,D,E,F,G,H,I,J,K%20where%20A%3D"'+name+'"&key=0AtPkUdingtHEdFUzLWN0a3dkNDlyT09HNjVsNjg2ZXc';
 
 // Button for solving puzzle
-var solve = $("<input type='button' value='Solve' style='margin-left:8px'>")
+var solve = $("<input type='button' value='Solve' style='margin-left:8px;width:71px;'>")
 	.insertBefore (insert)
 	.click (function ()
 	{
@@ -140,6 +181,7 @@ if (GM_getValue ('name') != name)
 {
 	GM_setValue ('name',name);
 	GM_setValue ('stun', '');
+	GM_setValue ('prv', '');
 
 	var first = true;
 
@@ -178,38 +220,15 @@ if (GM_getValue ('name') != name)
 }
 
 // Create button to reset name
-$("<input type='button' value='Reset'>")
+$("<input type='button' value='Reset' style='width: 71px'>")
 	.insertBefore (insert)
 	.click (function ()
 	{
 		GM_deleteValue ('name');
 	});
 
-// Display info
-var prv = GM_getValue ('prv');
-var diff = parseInt (prv,2)^parseInt (input,2);
-var string = '';
-for (var i=0; i<input.length; i++)
-{
-	var mask = 1 << i;
-	if ((diff&mask) == mask)
-		string = (input.length-i)+','+string;
-}
-string = string.slice (0,string.length-1);
-var press = GM_getValue ('press');
-
-$("<div style='font-family:monospace'>Previous: "+prv+"<br>Current : </div>")
-	.append ($("<a>"+input+"</a>").click (function ()
-		{
-			input = prompt ('',input);
-			a.childNodes[0].nodeValue = input;
-		})
-	)
-	.append ($("<br>Differance: "+string+"<br>Pressed: "+press+"<br>"))
-	.insertBefore (insert);
-
 // Show error if spreadsheet and reality don't match
-if (string != $('#input_'+ (press-1)).val () && !first)
+if (string != $('#input_'+ (press-1)).val () && !first && $('span:contains("and takes a defensive position...")').length == 0)
 	$('#input_'+ (press-1)).css ("background-color", "red");
 
 GM_setValue ('prv',input);
