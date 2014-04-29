@@ -4,6 +4,7 @@
 // @description Monitors buffs and shows an alert when they have changed.
 // @include     http://*improbableisland.com/*
 // @exclude     http://*improbableisland.com/runmodule.php?module=staminasystem*
+// @exclude     http://*improbableisland.com/bio.php?char=*
 // @exclude     http://*enquirer.improbableisland.com/*
 // @version     1.0
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js
