@@ -7,6 +7,10 @@ Short Term Memory
 ------
 Not only for ii, should also be useful other places. Stores previous page for viewing with *Greasemonkey > User Script Commands > View previous page*.
 
+ii-dice
+------
+Roll a pair of dice, a single die, or custom die. Flip a coin. Draw a card from a deck. Generates message in chatbox, or alters if unavailable.
+
 ii-bartender
 ------
 Monitors buffs and shows an alert when they have changed.
@@ -14,6 +18,7 @@ Monitors buffs and shows an alert when they have changed.
 ii-slave-labour
 ------
 Automates actions. Currently included: refresh buffs, and deposit req.
+Note: very buggy.
 
 ii-sniffer
 ------
