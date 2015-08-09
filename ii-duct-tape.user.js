@@ -60,7 +60,7 @@ waitForKeyElements ("script", function (node)
 waitForKeyElements ("a.nav", function (node)
 {
 	var title = $(node).text ();
-	if (title.chatAt (0) == "(")
+	if (title.charAt (0) == "(")
 		title = title.substring (4);
 	
 	var link = title.replace(new RegExp(" ?\\(.*?\\) ?", 'g'), "");
