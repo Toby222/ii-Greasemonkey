@@ -20,7 +20,7 @@ var keys = {
 	"eBoy's Trading Station"     : "e",
 	"Sheila's Shack O' Shiny"    : "s",
 	"Bank of Improbable"         : "b",
-	"Quit to the fields"         : "",
+	"Quit to the fields"         : "Q",
 	"New Day Menu"               : "*",
 	"The Hunter's Lodge"         : "l",
 	"Location Four"              : "4",
@@ -81,7 +81,13 @@ waitForKeyElements ("script", function (node)
 		if ( e.altKey || e.ctrlKey || e.metaKey)
 			return;
 		
+		if ($('input:focus').length > 0)
+			return;
+		
 		var key = String.fromCharCode (e.charCode);
+		if (e.shiftKey)
+			key = key.toUpperCase ();
+		
 		$("[accesskey="+key+"]")[0].click ();
 	};
 });
