@@ -11,48 +11,77 @@
 // @run-at      document-start
 // ==/UserScript==
 var keys = {
-	
-	// Shops
-	"Bank of Improbable" : "B",
-	"eBoy's Trading Station" : "E",
-	"Sheila's Shack O' Shiny" : "S",
-	"Council Offices" : "C",
-	
+	// universal_links
+	"Return to the Outpost"      : "o",
+	"View your Inventory"        : "i",
+	"Return to the Jungle"       : "j",
+
+	// outpost_links
+	"eBoy's Trading Station"     : "e",
+	"Sheila's Shack O' Shiny"    : "s",
+	"Bank of Improbable"         : "b",
+	"Quit to the fields"         : "",
+	"New Day Menu"               : "*",
+	"The Hunter's Lodge"         : "l",
+	"Location Four"              : "4",
+	"Frequently Asked Questions" : "?",
+	"Council Offices"            : "c",
+	"Hall o' Fame"               : "f",
+	"Common Ground"              : "g",
+	"Clan Halls"                 : "h",
+	"Jungle"                     : "j",
+	"Daily News"                 : "n",
+	"Preferences"                : "p",
+	"Travel"                     : "t",
+	"List Contestants"           : "w",
+	"ScrapYard"                  : "#",
+	"Joe's Dojo"                 : "d",
+	"Rally Headquarters"         : "r",
+	"Reinforce the Defences"     : "r",
+
+	// travel_links
+	"North"                      : "t",
+	"East"                       : "h",
+	"South"                      : "b",
+	"West"                       : "f",
+	"North-East"                 : "y",
+	"North-West"                 : "r",
+	"South-East"                 : "n",
+	"South-West"                 : "v",
+	"Enter the Jungle"           : "j",
+	"World Map"                  : "m",
+
 	// OST
-	"Go to AceHigh" : "A",
-	"Go to Cyber City 404" : "C",
-	"Go to Improbable Central" : "I",
-	"Go to NewHome" : "H",
+	"Go to AceHigh"              : "a",
+	"Go to Cyber City 404"       : "c",
+	"Go to Improbable Central"   : "i",
+	"Go to NewHome"              : "h",
 	
 	// Looking for trouble
-	"Look for an Easy Fight" : "1",
-	"Look for Trouble" : "2",
-	"Look for Big Trouble" : "3",
-	"Look for Really Big Trouble" : "4",
+	"Hospital Tent"              : "h",
+	"Look for an Easy Fight"     : "1",
+	"Look for Trouble"           : "2",
+	"Look for Big Trouble"       : "3",
+	"Look for Really Big Trouble" : "4"
 	
 	// Down below
-	"North" : "W",
-	"South" : "S",
-	"West" : "A",
-	"East" : "D",
+	// "North" : "W",
+	// "South" : "S",
+	// "West" : "A",
+	// "East" : "D",
 
-	"View your Inventory" : "I",
-	"Enter the Jungle" : "J",
-	"Return to the Outpost" : "R",
-	"Back to the Outpost" : "R",
-	
 	// ii-slaves
-	"Heal" : "H"
+	// "Heal" : "H"
 };
 
 waitForKeyElements ("script", function (node)
 {
   unsafeWindow.document.onkeypress = function(e)
 	{
-		if ( e.altKey || e.ctrlKey || e.shiftKey || e.metaKey)
+		if ( e.altKey || e.ctrlKey || e.metaKey)
 			return;
 		
-		var key = String.fromCharCode (e.charCode).toUpperCase ();
+		var key = String.fromCharCode (e.charCode);
 		$("[accesskey="+key+"]")[0].click ();
 	};
 });
@@ -72,21 +101,21 @@ waitForKeyElements ("a.nav", function (node)
 		if (key == undefined)
 			return;
 		
-		key = key.toUpperCase ();
+		key = key.toLowerCase ();
 		$(node).attr ("accesskey", key);
 		if ($("[accesskey='"+key+"']").length > 1)
 			$(node)
 				.text (title)
-				.attr ("accesskey", "");	
+				.attr ("accesskey", "");
 	} else
 	{
 		var key = keys[link];
-		var i = title.toUpperCase ().indexOf (key);
+		var i = link.toLowerCase ().indexOf (key);
 		
 		$("[accesskey='"+key+"']").each (function( index )
 		{
 			console.log ($(this).text ());
-	  	$(this)
+		$(this)
 				.text($(this).text ())
 				.attr ("accesskey", "");
 		});
