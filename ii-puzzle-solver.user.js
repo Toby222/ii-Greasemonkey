@@ -87,10 +87,13 @@ else if (parseInt (input) == 0)
 			url: query,
 			onload: function (response)
 			{
-				var reply = JSON.parse (response.responseText.slice (62,response.responseText.length-2)).table.rows[0].c;
+				var reply = JSON.parse (response.responseText.slice (response.responseText.indexOf('(') + 1,response.responseText.length-2)).table.rows[0].c;
 				var stun = reply[0].v;
 				for (var i = 1; i < reply.length; i++)
-					stun += ","+reply[i].v;
+					if (reply[i] == null)
+						stun += ",?";
+					else
+						stun += ","+reply[i].v;
 
 				$(document.createTextNode (stun)).appendTo (insert);
 				if (stun != '')
@@ -124,7 +127,7 @@ var insert = $('div.navhead:contains("Indiscriminate Flailing")');
 var zero = '';
 for (var i=0; i<input.length; i++)
 {
-	$("<input type='number' id='input_"+i+"' style='width:142px;height:17px;margin:1px 0 1px 8px;font-family:monospace'>")
+	$("<input id='input_"+i+"' style='width:142px;height:17px;margin:1px 0 1px 8px;font-family:monospace'>")
 		.insertBefore (insert)
 	zero += '0';
 }
@@ -199,7 +202,7 @@ if (GM_getValue ('name') != name)
 		url: query,
 		onload: function (response)
 		{
-			reply = JSON.parse (response.responseText.slice (62,response.responseText.length-2)).table.rows[0].c;
+			reply = JSON.parse (response.responseText.slice (response.responseText.indexOf('(') + 1,response.responseText.length-2)).table.rows[0].c;
 			for (var i=0; i<reply.length; i++)
 			{
 				$("#input_"+i).val (reply[i].v);
