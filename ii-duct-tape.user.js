@@ -99,7 +99,6 @@ waitForKeyElements ("a.nav", function (node)
 		title = title.substring (4);
 	
 	var link = title.replace(new RegExp(" ?\\(.*?\\) ?", 'g'), "");
-	console.log (title);
 
 	if (keys[link] == undefined)
 	{
@@ -120,7 +119,6 @@ waitForKeyElements ("a.nav", function (node)
 		
 		$("[accesskey='"+key+"']").each (function( index )
 		{
-			console.log ($(this).text ());
 		$(this)
 				.text($(this).text ())
 				.attr ("accesskey", "");

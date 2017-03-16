@@ -78,8 +78,6 @@ waitForKeyElements ("a.nav", function (node)
 {
 	if ($(node).attr('href') == undefined)
 		return;
-	else
-		console.log ($(node).attr('href'));
 
 	for (let action of auto)
 	{
