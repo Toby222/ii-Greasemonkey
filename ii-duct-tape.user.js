@@ -74,7 +74,7 @@ waitForKeyElements ("script", node => {
     if ($('input:focus').length > 0) return
     
     let key = String.fromCharCode (e.charCode)
-    $(`[accesskey='${key}']`).eq(0).click()
+    $(`[accesskey='${key}']`)[0].click()
   }
 })
 
