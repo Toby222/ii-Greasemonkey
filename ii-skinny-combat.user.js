@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name        ii-skinny-combat
-// @namespace   http://RedHatter.github.com
+// @description Displays abbreviated combat text.
+// @namespace   http://idioticdev.com
 // @include     http://*improbableisland.com/*op=search*
 // @include     http://*improbableisland.com/*op=fight*
 // @include     http://*improbableisland.com/*module=worldmapen*
 // @include     http://*improbableisland.com/badnav.php*
 // @version     1
-// @require     http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js
+// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js
 // @grant       GM_setValue
 // @grant       GM_getValue
 // ==/UserScript==
