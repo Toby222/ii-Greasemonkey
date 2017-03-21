@@ -9,20 +9,36 @@ Not only for ii, should also be useful other places. Stores previous page for vi
 
 ii-dice
 ------
-Roll a pair of dice, a single die, or custom die. Flip a coin. Draw a card from a deck. Generates message in chatbox, or alters if unavailable.
+Roll a pair of dice, a single die, or custom die. Flip a coin. Draw a card from a deck. Ether generates message in chatbox, or shows a popup.
+
+ii-sniffer
+------
+Detects when a crate sniffer is used and darkens map squares with possible crates. Removes squares as they are visited. Tracks how many crates out of the total you have found.
+
+ii-duct-tape
+------
+Makes the hotkeys more consistent, so that e.g. Bank of Improbable is always "b". Runs before page load to avoid 'flashing' the old hotkeys.
+
+ii-eboys-assistant
+------
+Adds a 'Sell all' link for batch selling whenever you sell an item at eBoy's Trading Station.
+
+ii-junk
+------
+Lists item price, price per kg, and total bag value in inventory. Prices are based on last eboy you visited.
+
+ii-skinny-combat
+-----
+Displays abbreviated combat text.
 
 ii-bartender
 ------
-Monitors buffs and shows an alert when they have changed.
+Notifies you when your buffs have changed.
 
 ii-slave-labour
 ------
 Automates actions. Currently included: refresh buffs, and deposit req.
 Note: very buggy.
-
-ii-sniffer
-------
-Detects when a crate sniffer is used and darkens map squares with possible crates removing squares already visited.
 
 ii-advanced-game-map
 ------
