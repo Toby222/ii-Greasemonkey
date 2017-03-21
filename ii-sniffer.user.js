@@ -1,67 +1,90 @@
 // ==UserScript==
 // @name        ii-sniffer
-// @namespace   http://RedhHtter.github.com
-// @description Show snifsfer range on map.
-// @include     http://*improbableisland.com*
-// @version     1
-// @require     http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js
+// @namespace   http://idioticdev.com
+// @description Show sniffers range on map.
+// @include     http://*improbableisland.com/badnav.php*
+// @include     http://*improbableisland.com/inventory.php*
+// @include     http://*improbableisland.com/runmodule.php?module=worldmapen*
+// @version     2
+// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @grant       GM_deleteValue
 // ==/UserScript==
 
-var attr = $('[style*="images/map/marker_"]').parents('td').attr('alt');
-if (attr)
-{
-	var split = attr.indexOf(',');
-	var cy = attr.substring(1,split);
-	var cx = attr.substring(split+2,attr.indexOf(')'));
-	
-	var crates = GM_getValue('crates') ? GM_getValue('crates') : 0;
-	
-	if ($("td:contains('There is a Supply Crate here.')").length > 0)
-		GM_setValue('crates',crates+1);
-	
-	GM_setValue('y',cy);
-	GM_setValue('x',cx);
-	
-	var box_y = parseInt(GM_getValue('box_y'), 10);
-	var box_x = parseInt(GM_getValue('box_x'), 10);
-	
-	if (box_y && box_x)
-	{
-		$('<button>Reset</button>').click(function (){reset()}).appendTo('h2:contains("Travel")');
-	
-		var visited = GM_getValue('visited')+'/'+cy+','+cx;
-		GM_setValue('visited',visited);
-		
-		var count = 0;
-		
-		for (var y = 0; y < 7; y++)
-			for (var x = 0; x < 7; x++)
-			{
-				if (visited.indexOf((y+box_y)+','+(x+box_x)) > -1)
-					continue;
-				
-				$('td [alt*="('+(y+box_y)+', '+(x+box_x)+'"]')
-					.css('opacity', '0.7')
-					.parent().css('background-color', 'black');
-				count++;
-			}
-			
-		if (count < 1)
-			reset();
-	}
-
-} else if ($('body').text().indexOf("You thumb the switch on your Crate Sniffer.") > -1)
-{
-	GM_setValue('box_y', GM_getValue('y')-3);
-	GM_setValue('box_x', GM_getValue('x')-3);
+let match = $('.content').text().match(/It displays, weakly, the number ([\d,]*) in dull red LED's before its radio module catches fire/)
+if (match) {
+  let player = JSON.parse(GM_getValue('player', '{}'))
+  GM_setValue('origin', JSON.stringify({
+    x: player.x - 3,
+    y: player.y - 3
+  }))
+  GM_setValue('totalCrates', parseInt(match[1]))
+  return
 }
 
-function reset()
-{
-	GM_deleteValue('visited','');
-	GM_deleteValue('box_y','');
-	GM_deleteValue('box_x','');
+let found = GM_getValue('foundCrates', 0)
+match = $('.content').text().match(/There are ([\d,]*) Supply Crates here/)
+if (match) {
+  found += parseInt(match[1])
+  GM_setValue('foundCrates', found)
+}
+
+if ($('.content').text().includes('There is a Supply Crate here.'))
+  GM_setValue('foundCrates', ++found)
+
+let attr = $('[style*="images/map/marker_"]').parents('td').attr('alt')
+if (!attr) return
+
+let split = attr.indexOf(',')
+let player = {
+  y: parseInt(attr.substring(1, split)),
+  x: parseInt(attr.substring(split + 2, attr.indexOf(')')))
+}
+GM_setValue('player', JSON.stringify(player))
+
+let origin = JSON.parse(GM_getValue('origin'))
+if (!origin) return
+
+$('.navhead').first().before(
+  $('<div/>', {
+    class: 'navhead',
+    text: 'Sniffer'
+  }),
+  $('<table/>').append(
+    $('<tr>').append($('<td/>').text('Total Crates '), $('<td/>').text(GM_getValue('totalCrates'))),
+    $('<tr>').append($('<td/>').text('Found Crates '), $('<td/>').text(found))
+  ),
+  $('<a/>', {
+    class: 'nav',
+    href: '',
+    text: 'Reset',
+    click: reset
+  }),
+  $('<br>').attr('clear', 'all')
+)
+
+let visited = `${GM_getValue('visited', '')}/${player.y},${player.x}`
+GM_setValue('visited', visited)
+
+let count = 0
+
+for (let y = 0; y < 7; y++)
+  for (let x = 0; x < 7; x++) {
+    if (visited.includes(`/${y + origin.y},${x + origin.x}`))
+      continue
+    
+    $(`td [alt*="(${y + origin.y}, ${x + origin.x}"]`)
+      .css('opacity', '0.7')
+      .parent().css('background-color', 'black')
+    count++
+  }
+  
+if (count < 1)
+  reset()
+
+function reset() {
+  GM_deleteValue('visited')
+  GM_deleteValue('origin')
+  $('td[style*="opacity: 0.7"]').css('opacity', 'initial')
 }
