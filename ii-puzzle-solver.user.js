@@ -1,13 +1,13 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @name        ii-puzzle-solver
-// @namespace   http://RedHatter.github.com
+// @namespace   http://idioticdev.com
 // @description Solves for puzzle combat.
-// @require     http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js
+// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js
 // @include     http://*improbableisland.com/*op=search*
 // @include     http://*improbableisland.com/*op=fight*
 // @include     http://*improbableisland.com/*module=worldmapen*
 // @include     http://*improbableisland.com/badnav.php*
-// @version     2.0
+// @version     3
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @grant       GM_deleteValue
@@ -19,262 +19,173 @@
  * 0 = green
  */
 
-// Build the input and filter strings to represent the arm positions
-var input = '';
-var filter = '';
-$("td > a > div > div").each (function (index)
-{
-	if ($(this).css ("background-image").indexOf ('orange') != -1)
-	{
-		input += 1;
-		filter += 0;
-	} else if ($(this).css ("background-image").indexOf ('disabled') != -1)
-	{
-		input += 0;
-		filter += 1;
-	} else if ($(this).css ("background-image").indexOf ('red') != -1)
-	{
-		input += 'R';
-		filter += 0;
-	} else
-	{
-		input += 0;
-		filter += 0;
-	}
+let state = ''
+let broken = ''
+let zero = ''
+let inputs = []
+let details = $('<table/>')
 
-	// Store key press when arm is clicked
-	$(this).click (function ()
-	{
-		GM_setValue ('press',index+1);
-	})
-});
+if ($('a.nav > div > div').length < 1
+  || $('div[style*="puzzlecombat_red"]').length > 0)
+  return
 
-// Display info
-var prv = GM_getValue ('prv');
-var diff = (parseInt (prv,2)^parseInt (input,2));
-var string = '';
-for (var i=0; i<input.length; i++)
-{
-	var mask = 1 << i;
-	if ((diff&mask) == mask)
-		string = (input.length-i)+','+string;
-}
-string = string.slice (0,string.length-1);
-var press = GM_getValue ('press');
+$(document).keypress (e => {
+  if (e.which > 48 && e.which < 58)
+    GM_setValue ('arm', e.which-48)
+})
 
+function setup () {
+  let nextSection = $('div.navhead:contains("Indiscriminate Flailing")')
+  $('<div/>').addClass('navhead').text('Puzzle Solver').insertBefore(nextSection)
+  
+  $('a.nav > div > div').each((i, el) => {
+    let bg = $(el).css ("background-image")
+    state += bg.indexOf ('orange') !== -1 ? '1' : '0'
+    broken += bg.indexOf ('disabled') !== -1 ? '1' : '0'
+    zero += '0'
 
-if (input == '' || input.indexOf ('R') > -1)
-	return;
+    inputs.push($('<input/>')
+      .css({
+        margin: '5px 0 0 8px',
+        width: $(el).width() + 'px',
+        background: 'none',
+        border: 'none',
+        'border-bottom': '1px solid black'
+      })
+      .insertBefore(nextSection))
+  })
 
-// If input is all zeros (green) than monster is stunned, get stun sequence
-else if (parseInt (input) == 0)
-{
-	var insert = $("<div style='font-family:monospace'><br>Differance: "+string+"<br>Pressed: "+press+"<br>Stun: </div>").insertBefore ($('div.navhead:contains("Strike body parts")'));
+  $('<a>').text('Solve Puzzle')
+    .attr('href', '')
+    .addClass('nav')
+    .css('padding', '8px')
+    .click(e => {
+      e.preventDefault()
+      parsePuzzle()
+    })
+    .insertBefore(nextSection)
 
-	if (GM_getValue ('stun') == '')
-	{
-		var name = GM_getValue ('name');
-		if (name == "Lion")
-		{
-			var level = $('span:contains("(Level")').text ();
-			level =	level.slice (level.indexOf ('(Level')+7,level.indexOf (')'));
-			query = 'https://spreadsheets.google.com/tq?tq=select%20L,M,N,O,P%20where%20A%20contains%20"Lion"%20and%20B='+level+'&key=0AtPkUdingtHEdFUzLWN0a3dkNDlyT09HNjVsNjg2ZXc';
-		} else
-			query = 'https://spreadsheets.google.com/tq?tq=select%20L,M,N,O,P%20where%20A%3D"'+name+'"&key=0AtPkUdingtHEdFUzLWN0a3dkNDlyT09HNjVsNjg2ZXc';
+  // Display information
+  let previous = GM_getValue ('previous')
+  let diffBinary = parseInt(previous, 2) ^ parseInt(state, 2)
+  let differance = [];
+  for (let i = 0; i < state.length; i++) {
+    let mask = 1 << i;
+    if ((diffBinary & mask) == mask)
+      differance.push(state.length - i)
+  }
 
-		GM_xmlhttpRequest ({
-			method: "GET",
-			url: query,
-			onload: function (response)
-			{
-				var reply = JSON.parse (response.responseText.slice (response.responseText.indexOf('(') + 1,response.responseText.length-2)).table.rows[0].c;
-				var stun = reply[0].v;
-				for (var i = 1; i < reply.length; i++)
-					if (reply[i] == null)
-						stun += ",?";
-					else
-						stun += ","+reply[i].v;
-
-				$(document.createTextNode (stun)).appendTo (insert);
-				if (stun != '')
-					GM_setValue ('stun', stun);
-			}
-		});
-	} else
-		$(document.createTextNode (GM_getValue ('stun'))).appendTo (insert);
-	return;
+  details.append(
+    $('<tr/>').append($('<td/>').text('Current'), $('<td/>').text(state)),
+    $('<tr/>').append($('<td/>').text('Previous'), $('<td/>').text(previous)),
+    $('<tr/>').append($('<td/>').text('Differance'), $('<td/>').text(differance.reverse().join(','))),
+    $('<tr/>').append($('<td/>').text('Arm Attacked'), $('<td/>').text(GM_getValue('arm')))
+  ).insertBefore(nextSection)
+  GM_setValue('previous', state)
 }
 
-$("<div style='font-family:monospace'>Previous: "+prv+"<br>Current : </div>")
-	.append ($("<a>"+input+"</a>").click (function ()
-		{
-			input = prompt ('',input);
-			a.childNodes[0].nodeValue = input;
-		})
-	)
-	.append ($("<br>Differance: "+string+"<br>Pressed: "+press+"<br>"))
-	.insertBefore ($('div.navhead:contains("Strike body parts")'));
+function findMonster () {
+  let monster = $('#combatbars table:last td:last').text()
+  if (monster.indexOf ('Elite') == 0) monster = monster.slice (6)
+  else if (monster.indexOf ('Deadly') == 0) monster = monster.slice (7)
+  else if (monster.indexOf ('Lethal') == 0) monster = monster.slice (7)
+  else if (monster.indexOf ('Savage') == 0) monster = monster.slice (7)
+  else if (monster.indexOf ('Malignant') == 0) monster = monster.slice (10)
+  else if (monster.indexOf ('Dangerous') == 0) monster = monster.slice (10)
+  else if (monster.indexOf ('Malevolent') == 0) monster = monster.slice (11)
 
-// Store keypress when a key is pressed
-$(document).keypress (function (e)
-{
-	if (e.which>48 && e.which<58)
-		GM_setValue ('press',e.which-48)
-});
+  let count = $(`#combatbars table b:contains("${monster}")`).length
+  if (count > 1)
+    monster = `${monster} (x${count})`
 
-// Create and insert text box for each arm
-var insert = $('div.navhead:contains("Indiscriminate Flailing")');
-var zero = '';
-for (var i=0; i<input.length; i++)
-{
-	$("<input id='input_"+i+"' style='width:142px;height:17px;margin:1px 0 1px 8px;font-family:monospace'>")
-		.insertBefore (insert)
-	zero += '0';
+  let level = parseInt($('.content span:contains("(Level ")').text().substring(7))
+
+  if (parseInt(state, 2) === 0)
+    retrieveStun (monster, level)
+  else
+    retrieveTargets (monster, level)
 }
 
-// Extract monster name
-var name = $("div#combatbars > table:last td > b").text ();
-var num = $("div#combatbars > table td > b:contains("+name+")").length;
-
-if (name.indexOf ('Elite') == 0){name = name.slice (6);}
-else if (name.indexOf ('Deadly') == 0){name = name.slice (7);}
-else if (name.indexOf ('Lethal') == 0){name = name.slice (7);}
-else if (name.indexOf ('Savage') == 0){name = name.slice (7);}
-else if (name.indexOf ('Malignant') == 0){name = name.slice (10);}
-else if (name.indexOf ('Dangerous') == 0){name = name.slice (10);}
-else if (name.indexOf ('Malevolent') == 0){name = name.slice (11);}
-
-if (num > 1)
-	name += ' (x'+num+')';
-
-// Set url for getting monster info from spreadsheet
-var query;
-if (name == "Lion")
-{
-	var level = $('span:contains("(Level")').text ();
-	level =	level.slice (level.indexOf ('(Level')+7,level.indexOf (')'));
-	query = 'https://spreadsheets.google.com/tq?tq=select%20C,D,E,F,G,H,I,J,K%20where%20A%20contains%20"Lion"%20and%20B='+level+'&key=0AtPkUdingtHEdFUzLWN0a3dkNDlyT09HNjVsNjg2ZXc';
-} else
-	query = 'https://spreadsheets.google.com/tq?tq=select%20C,D,E,F,G,H,I,J,K%20where%20A%3D"'+name+'"&key=0AtPkUdingtHEdFUzLWN0a3dkNDlyT09HNjVsNjg2ZXc';
-
-// Button for solving puzzle
-var solve = $("<input type='button' value='Solve' style='margin-left:8px;width:71px;'>")
-	.insertBefore (insert)
-	.click (function ()
-	{
-		var toggles = [];
-		for (var i=0; i<input.length; i++)
-		{
-			var toggle = $("#input_"+i).val ().split (',');
-			var num = zero;
-			for (var a=0; a<toggle.length; a++)
-			{
-				num = replaceAt (num, parseInt (toggle[a])-1, '1');
-			}
-			toggles.push (parseInt (num, 2));
-		}
-		$(this)
-			.val (combinations (toggles, parseInt (input, 2), parseInt (filter, 2)))
-			.blur ();
-	});
-
-
-// Set arm combinations ether by memory (if correct) or spreadsheet
-if (GM_getValue ('name') != name)
-{
-	GM_setValue ('name',name);
-	GM_setValue ('stun', '');
-	GM_setValue ('prv', '');
-
-	var first = true;
-
-
-	// Remember dummy values to stop null error
-	for (var i=0; i<input.length; i++)
-	{
-		GM_setValue ('input_'+i, '0');
-	}
-
-	// Get monster info from spreadsheet
-	var reply;
-	GM_xmlhttpRequest ({
-		method: "GET",
-		url: query,
-		onload: function (response)
-		{
-			reply = JSON.parse (response.responseText.slice (response.responseText.indexOf('(') + 1,response.responseText.length-2)).table.rows[0].c;
-			for (var i=0; i<reply.length; i++)
-			{
-				$("#input_"+i).val (reply[i].v);
-				GM_setValue ('input_'+i, reply[i].v);
-				solve.click ();
-			}
-		}
-	});
-} else
-{
-	// Set values from memory
-	for (var i=0; i<input.length; i++)
-	{
-		$('#input_'+i).val (GM_getValue ('input_'+i));
-	}
-	var first = false;
-	solve.click ();
+function retrieveTargets (name, level) {
+  querySpreadsheet(name === 'Lion' ?
+    `select C,D,E,F,G,H,I,J,K where A contains "Lion" and B=${level}` :
+    `select C,D,E,F,G,H,I,J,K where A="${name}"`, targets => {
+      inputs.forEach((input, i) => input.val(targets[i] ? targets[i].v : ''))
+      parsePuzzle()
+    })
 }
 
-// Create button to reset name
-$("<input type='button' value='Reset' style='width: 71px'>")
-	.insertBefore (insert)
-	.click (function ()
-	{
-		GM_deleteValue ('name');
-	});
-
-// Show error if spreadsheet and reality don't match
-if (string != $('#input_'+ (press-1)).val () && !first && $('span:contains("and takes a defensive position...")').length == 0)
-	$('#input_'+ (press-1)).css ("background-color", "red");
-
-GM_setValue ('prv',input);
-
-// Search for a working combination by brute force
-function combinations (array,test,filter)
-{
-	var result = [];
-
-	function loop (start,depth,prefix)
-	{
-		for (var i=start; i<array.length; i++)
-		{
-			var next = prefix^array[i];
-			if (depth > 0)
-			{
-				if (loop (i+1,depth-1,next))
-				{
-					result.push (i+1);
-					return true;
-				}
-			} else
-			{
-				var combo = test^next;
-				if (combo == 0 || (combo&filter) == combo)
-				{
-					result.push (i+1);
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
-
-	for (var i=0; i<array.length; i++)
-		if (loop (0,i,0))
-			break;
-
-	return result;
+function retrieveStun (name, level) {
+  querySpreadsheet(name === 'Lion' ?
+    `select L,M,N,O,P where A contains "Lion" and B=${level}` :
+    `select L,M,N,O,P where A="${name}"`, sequence => {
+      $('<tr/>').append(
+        $('<td/>').text('Stun Sequence'),
+        $('<td/>').text(sequence.map(c => c.v))
+      ).appendTo(details)
+    })
 }
 
-function replaceAt (str, index, char)
-{
-      return str.substr (0, index) + char + str.substr (index+char.length);
+function querySpreadsheet (query, callback) {
+  GM_xmlhttpRequest ({
+    method: "GET",
+    url: `https://spreadsheets.google.com/tq?tq=${query}&key=0AtPkUdingtHEdFUzLWN0a3dkNDlyT09HNjVsNjg2ZXc`,
+    onload: response => {
+      callback(JSON.parse (
+        response.responseText.slice (
+          response.responseText.indexOf('(') + 1,
+          response.responseText.length-2)).table.rows[0].c)
+    }
+  })
 }
+
+function parsePuzzle () {
+  let toggles = [];
+  for (let i = 0; i < state.length; i++) {
+    let toggle = inputs[i].val().split (',')
+    let binary = zero
+    for (let a of toggle) {
+      let index = parseInt(a) - 1
+      binary = binary.substring(0, index) + '1' + binary.substr(index + 1)
+    }
+
+    toggles.push (parseInt (binary, 2))
+  }
+
+  let result = solve(toggles, parseInt(state, 2), parseInt(broken, 2))
+  for (let arm of result)
+    inputs[arm - 1].css('background-color', 'green')
+}
+
+function solve (array, test, filter) {
+  var result = [];
+
+  function loop (start,depth,prefix) {
+    for (var i=start; i<array.length; i++) {
+      var next = prefix^array[i];
+      if (depth > 0) {
+        if (loop (i+1,depth-1,next)) {
+          result.push (i+1);
+          return true;
+        }
+      } else {
+        var combo = test^next;
+        if (combo == 0 || (combo&filter) == combo) {
+          result.push (i+1);
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  for (var i=0; i<array.length; i++)
+    if (loop (0,i,0))
+      break;
+
+  return result;
+}
+
+setup()
+findMonster()
