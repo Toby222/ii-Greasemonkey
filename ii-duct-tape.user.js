@@ -4,7 +4,7 @@
 // @description Makes the hotkeys more consistent, so that e.g. Bank of Improbable is always "b". 
 // @include     http://*improbableisland.com/*
 // @exclude     http://*improbableisland.com/home.php*
-// @version     2
+// @version     2.1
 // @grant       none
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js
 // @require     https://gist.github.com/raw/2625891/waitForKeyElements.js
@@ -80,6 +80,9 @@ waitForKeyElements ("script", node => {
 
 let processed = []
 waitForKeyElements ("a.nav", node => {
+  let target = $('div div div', node)
+  if (target) node = target
+  
   if (processed.includes(node[0])) return
   processed.push(node[0])
   
