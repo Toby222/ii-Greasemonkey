@@ -7,6 +7,10 @@ Short Term Memory
 ------
 Not only for ii, should also be useful other places. Stores previous page for viewing with *Greasemonkey > User Script Commands > View previous page*.
 
+ii-eboys-assistant
+------
+Enables batch buying and selling at eBoy's Trading Station.
+
 ii-full-xp
 ------
 Alters your XP bar to show how far you could level and how much XP until the level after that.
@@ -22,10 +26,6 @@ Detects when a crate sniffer is used and darkens map squares with possible crate
 ii-duct-tape
 ------
 Makes the hotkeys more consistent, so that e.g. Bank of Improbable is always "b". Runs before page load to avoid 'flashing' the old hotkeys.
-
-ii-eboys-assistant
-------
-Adds a 'Sell all' link for batch selling whenever you sell an item at eBoy's Trading Station.
 
 ii-junk
 ------
