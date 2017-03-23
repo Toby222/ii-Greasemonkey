@@ -7,6 +7,10 @@ Short Term Memory
 ------
 Not only for ii, should also be useful other places. Stores previous page for viewing with *Greasemonkey > User Script Commands > View previous page*.
 
+ii-full-xp
+------
+Alters your XP bar to show how far you could level and how much XP until the level after that.
+
 ii-dice
 ------
 Roll a pair of dice, a single die, or custom die. Flip a coin. Draw a card from a deck. Ether generates message in chatbox, or shows a popup.
