@@ -21,7 +21,6 @@ let regex = [
 	// Simple damage
 	[/You hit .+ for ([\d,]+) points of damage!/, "", "`4 -\1 HP"],
 	[/You try to hit .+ but are RIPOSTED for ([\d,]+) points of damage!/, "`4-\1 HP", ""],
-//	[/You execute a .*power move!!!/, 1],
 	[/.+ tries to hit you but MISSES!/, "", "`4MISS"],
 	[/You try to hit .+ but MISS!/, "`4MISS", ""],
 	[/.+ tries to hit you but you RIPOSTE for ([\d,]+) points of damage!/, "", "`4 -\1 HP"],
@@ -46,6 +45,7 @@ let regex = [
 	[/Your Plasma Gun spits gobbets of superheated gas at your opponent!/, "`3+200% Atk", ""],
 	[/.+ hits you, and a streak of lightning jumps from your suit, causing ([\d,]+) damage!/, "", "`4-\1 HP"],
 	[/.+ is hit by a piece of random debris for ([\d,]+) damage!/, "", "`4-\1 HP"],
+	[/As your enemy attacks you, electricity arcs back from your Lightning Gun, causing ([\d,]+) damage!/, "", "`4-\1 HP"],
 
 	// Booz
 
