@@ -13,6 +13,8 @@
     15143, 19121, 23840, 29437, 36071, 43930, 43930
   ]
   let box = $('td.charinfo:contains("Experience") + td span')
+  if (box.length < 1) return
+
   let xp = box.text().split('/')
   let target = parseInt(xp[1].replace(',', ''))
   xp = parseInt(xp[0].replace(',', ''))
