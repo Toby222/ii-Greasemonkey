@@ -16,6 +16,7 @@ let xp = box.text().split('/')
 let target = parseInt(xp[1].replace(',', ''))
 xp = parseInt(xp[0].replace(',', ''))
 let level = parseInt($('td.charinfo:contains("Level")').next().text())
+let current = level
 let dk = (target - base[level]) / level / 25
 
 while (xp > target) {
@@ -23,9 +24,15 @@ while (xp > target) {
   target = base[level] + (level) * dk * 25
 }
 
+if (level <= current) return
+
+let last = base[level - 1] + (level - 1) * dk * 25
+let over = xp - last
+let bar = target - last
+
 box.append(`Level ${level}`)
 $('td[bgcolor="blue"]', box)
-  .attr('width', `${xp / target}%`)
+  .attr('width', `${over / bar * 100}%`)
   .attr('bgcolor', 'white')
   .closest('span')
     .attr('title', `${target - xp} XP remaining`)
