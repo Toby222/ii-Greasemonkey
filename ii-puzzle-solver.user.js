@@ -7,7 +7,8 @@
 // @include     http://*improbableisland.com/*op=fight*
 // @include     http://*improbableisland.com/*module=worldmapen*
 // @include     http://*improbableisland.com/badnav.php*
-// @version     3
+// @include     http://*improbableisland.com/runmodule.php?module=onslaught*
+// @version     3.1
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @grant       GM_deleteValue
@@ -19,20 +20,25 @@
  * 0 = green
  */
 
-let state = ''
-let broken = ''
-let zero = ''
-let inputs = []
-let details = $('<table/>')
+(function () {
+  let state = ''
+  let broken = ''
+  let zero = ''
+  let inputs = []
+  let details = $('<table/>')
 
-if ($('a.nav > div > div').length < 1
-  || $('div[style*="puzzlecombat_red"]').length > 0)
-  return
+  if ($('a.nav > div > div').length < 1
+    || $('div[style*="puzzlecombat_red"]').length > 0)
+    return
 
-$(document).keypress (e => {
-  if (e.which > 48 && e.which < 58)
-    GM_setValue ('arm', e.which-48)
-})
+  $(document).keypress (e => {
+    if (e.which > 48 && e.which < 58)
+      GM_setValue ('arm', e.which-48)
+  })
+
+  setup()
+  findMonster()
+})()
 
 function setup () {
   let nextSection = $('div.navhead:contains("Indiscriminate Flailing")')
@@ -108,7 +114,7 @@ function findMonster () {
 
 function retrieveTargets (name, level) {
   querySpreadsheet(name === 'Lion' ?
-    `select C,D,E,F,G,H,I,J,K where A contains "Lion" and B=${level}` :
+    `select C,D,E,F,G,H,I,J,K where A contains "Lion (${level})" and B=${level}` :
     `select C,D,E,F,G,H,I,J,K where A="${name}"`, targets => {
       inputs.forEach((input, i) => input.val(targets[i] ? targets[i].v : ''))
       parsePuzzle()
@@ -117,7 +123,7 @@ function retrieveTargets (name, level) {
 
 function retrieveStun (name, level) {
   querySpreadsheet(name === 'Lion' ?
-    `select L,M,N,O,P where A contains "Lion" and B=${level}` :
+    `select L,M,N,O,P where A contains "Lion (${level})" and B=${level}` :
     `select L,M,N,O,P where A="${name}"`, sequence => {
       $('<tr/>').append(
         $('<td/>').text('Stun Sequence'),
@@ -186,6 +192,3 @@ function solve (array, test, filter) {
 
   return result;
 }
-
-setup()
-findMonster()
