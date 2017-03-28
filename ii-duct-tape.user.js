@@ -4,7 +4,7 @@
 // @description Makes the hotkeys more consistent, so that e.g. Bank of Improbable is always "b". 
 // @include     http://*improbableisland.com/*
 // @exclude     http://*improbableisland.com/home.php*
-// @version     2.1
+// @version     2.2
 // @grant       none
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js
 // @require     https://gist.github.com/raw/2625891/waitForKeyElements.js
@@ -50,6 +50,7 @@ let keys = {
   "South-West"                 : "v",
   "Enter the Jungle"           : "j",
   "World Map"                  : "m",
+  "Pick up Supply Crate"       : "p",
 
   // OST
   "Go to AceHigh"              : "a",
@@ -74,14 +75,18 @@ waitForKeyElements ("script", node => {
     if ($('input:focus').length > 0) return
     
     let key = String.fromCharCode (e.charCode)
-    $(`[accesskey='${key}']`)[0].click()
+    let link = $(`[accesskey='${key}']`)
+    if (link.length < 1) return
+
+    link[0].click()
   }
 })
 
 let processed = []
 waitForKeyElements ("a.nav", node => {
   let target = $('div div div', node)
-  if (target) node = target
+  if (target.length == 0) target = $('div div', node)
+  if (target.length > 0) node = target
   
   if (processed.includes(node[0])) return
   processed.push(node[0])
@@ -90,7 +95,7 @@ waitForKeyElements ("a.nav", node => {
   if (title.charAt (0) == "(")
     title = title.substring(4)
   
-  let link = title.replace(new RegExp(" ?\\(.*?\\) ?", 'g'), "")
+  let link = title.replace(/ ?\(.*?\) ?/g, '')
 
   if (!keys[link]) {
     let key = node.attr ("accesskey")
@@ -112,14 +117,17 @@ function assign (node, title, key) {
       title = title.substring(4)
   }
   
-  if (!key)
-    for (let i = 0; i < title.length; i++) {
-      let tryk = title.charAt(i).toLowerCase()
+  if (!key) {
+    let link = title.replace(/ ?\(.*?\) ?/g, '')
+    
+    for (let i = 0; i < link.length; i++) {
+      let tryk = link.charAt(i).toLowerCase()
       if (links[tryk] || tryk == ' ' || tryk == "'") continue
         
       key = tryk
       break
     }
+  }
     
   if (!key) return
 
@@ -128,6 +136,8 @@ function assign (node, title, key) {
   if (dup) assign(dup)
 
   let i = title.toLowerCase().indexOf(key)
+  if (i < 0)
+    i = title.indexOf(key)
   
   $(node)
     .html (i > -1
