@@ -8,41 +8,63 @@
 // @grant       none
 // ==/UserScript==
 class Inventory {
-  constructor () {
-    this.view = $('<div>').addClass('inventory')
-
+  constructor (type) {
+    let buttons = $('<div>').append(
+      $('<a>', {
+        text: 'Clear',
+        href: '',
+        click: e => {
+          e.preventDefault()
+          this.items.forEach(item => item.clear())
+        }
+      }))
+    if (type == 'sell')
+      buttons.append(' | ',
+      $('<a>', {
+        text: 'All',
+        href: '',
+        click: e => {
+          e.preventDefault()
+          this.items.forEach(item => item.queue(item.quantity))
+        }
+      }))
+    this.view = $('<div>').addClass('inventory').append(buttons)
+    
     this.items = []
-    $('.navhead:contains("Sell Items")').nextUntil('.navhead', 'a.nav').each((i, e) => {
-      let match = $(e).text().match(/(.+?) \(([\d,]+) available\)/)
-      let item = new Item(match[1], parseInt(match[2].replace(/,/g, '')))
-      this.view.append(item.view)
-      item.listener = this.itemChanged.bind(this)
-      this.items.push(item)
-    })
-
-    this.cachier = new Cashier()
-    this.view.append(this.cachier.view)
+    $(type == 'sell' ? '.navhead:contains("Sell Items")' : '.navhead:contains("Buy Items")')
+      .nextUntil('.navhead', 'a.nav').each((i, e) => {
+        let item = null
+        if (type == 'sell') {
+          let match = $(e).text().match(/(.+?) \(([\d,]+) available\)/)
+          item = new Item(match[1], parseInt(match[2].replace(/,/g, '')))
+        } else {
+          let match = $(e).text().match(/(.+?) \(([\d,]+) Req\)/)
+          item = new PermItem(match[1], parseInt(match[2].replace(/,/g, '')))
+        }
+        this.view.append(item.view)
+        this.items.push(item)
+      })
   }
-
-  render () {
-    this.items.forEach(item => item.render())
-    this.cachier.render()
-  }
-
-  itemChanged () {
+  
+  getItems () {
     let items = []
     this.items.forEach(item => {
       for (let i = 0; i < item.queued; i++)
         items.push(item.name)
     })
-    this.cachier.setItems(items)
+    
+    return items
+  }
+
+  render () {
+    this.items.forEach(item => item.render())
   }
 }
 
-class Item {
-  constructor (name, quantity) {
+class PermItem {
+  constructor (name, cost) {
     this.name = name
-    this.quantity = quantity
+    this.cost = cost
     this.queued = 0
 
     this.view = $('<div>').addClass('trdark item')
@@ -55,8 +77,62 @@ class Item {
   }
 
   queue (amount) {
-    this.queued = Math.min(this.queued + (amount || 1), this.quantity)
+    this.queued = Math.max(this.queued + (amount || 1), 0)
 
+    this.render()
+    this.listener()
+  }
+  
+  clear () {
+    this.queued = 0
+    
+    this.render()
+    this.listener()
+  }
+
+  render() {
+    this.view.attr('data-cost', this.cost)
+    if (this.queued > 0)
+      this.view.attr('data-queued', this.queued)
+    else
+      this.view.removeAttr('data-queued')
+  }
+}
+
+class Item {
+  constructor (name, quantity) {
+    this.name = name
+    this.quantity = quantity
+    this.queued = 0
+
+    this.selectAllView = $('<div>').click(e => {
+      e.stopPropagation()
+      
+      if (this.queued == this.quantity)
+        this.clear()
+      else
+        this.queue(this.quantity)
+    })
+    this.view = $('<div>').addClass('trdark item')
+      .append(this.selectAllView)
+      .css('background-image', `url('${icons[this.name]}'`)
+      .click(() => this.queue())
+      .contextmenu(e => {
+        e.preventDefault()
+        this.queue(-1)
+      })
+  }
+
+  queue (amount) {
+    this.queued = Math.max(Math.min(this.queued + (amount || 1), this.quantity), 0)
+
+    this.render()
+    this.listener()
+  }
+  
+  clear () {
+    this.queued = 0
+    
     this.render()
     this.listener()
   }
@@ -71,13 +147,27 @@ class Item {
 }
 
 class Cashier {
-  constructor () {
-    this.items = []
+  constructor (inventory, store) {
+    this.items = {
+      sell: [],
+      buy: []
+    }
+    
+    inventory.items.forEach(item =>
+      item.listener = () => {
+        this.items.sell = inventory.getItems()
+        this.render()
+      })
+    store.items.forEach(item =>
+      item.listener = () => {
+        this.items.buy = store.getItems()
+        this.render()
+      })
 
     this.progressView = $('<div>').append($('<div>'), $('<span>'))
     this.buttonView = $('<input>', {
       type: 'button',
-      value: 'Sell items.'
+      value: 'Select items to buy and sell.'
     }).click(() => {
       this.showProgress()
       this.do()
@@ -86,14 +176,21 @@ class Cashier {
   }
 
   do (context) {
-    if (this.items.length < 1) return
+    let url = ''
+    if (this.items.sell.length > 0) {
+      let item = this.items.sell.splice(0, 1)[0]
+      url = $(`a:contains("${item}")[href*="op=sell"]`,
+        context || $('td.navigation')).attr('href')
+    } else if (this.items.buy.length > 0) {
+      let item = this.items.buy.splice(0, 1)[0]
+      url = $(`a:contains("${item}")[href*="op=buy"]`,
+        context || $('td.navigation')).attr('href')
+    } else
+      return
 
-    let item = this.items.splice(0, 1)[0]
     this.render()
-    let url = $(`a:contains("${item}")[href*="op=sell"]`,
-      context || $('td.navigation')).attr('href')
 
-    if (this.items.length == 1) {
+    if (this.items.sell.length + this.items.buy.length < 1) {
       window.location = url
       return
     }
@@ -108,22 +205,17 @@ class Cashier {
     })
   }
 
-  setItems (items) {
-    this.items = items
-    this.render()
-  }
-
   showProgress () {
     this.view.empty().append(this.progressView)
-    this.initalCount = this.items.length
+    this.initalCount = this.items.sell.length + this.items.buy.length
     this.render()
   }
 
   render () {
-    this.buttonView.val(`Sell ${this.items.length} items.`)
+    this.buttonView.val(`Sell ${this.items.sell.length} / buy ${this.items.buy.length}.`)
     if (this.initalCount) {
-      let number = this.initalCount - this.items.length
-      $('span', this.progressView).text(`Selling ${number} of ${this.initalCount}`)
+      let number = this.initalCount - this.items.sell.length + this.items.buy.length
+      $('span', this.progressView).text(`${number} of ${this.initalCount}`)
       $('div', this.progressView).css('width', `${number / this.initalCount * 100}%`)
     }
   }
@@ -135,20 +227,36 @@ $('img[src*="images/items"]').each((i, e) => {
   icons[name] = $(e).attr('src')
 })
 
-const inventory = new Inventory()
+const inventory = new Inventory('sell')
+const store = new Inventory('buy')
+const cachier = new Cashier(inventory, store)
+
 $('<div>').addClass('assistant')
-  .append(inventory.view)
+  .append(inventory.view, store.view, cachier.view)
   .insertBefore($('.content h2').eq(0))
 inventory.render()
+store.render()
 
 $('<style>').text(`
   .assistant {
     border: 1px dotted black;
+    position: relative;
+  }
+  
+  .assistant::after {
+    content: '';
+    position: absolute;
+    top: 20px;
+    right: 50%;
+    bottom: 50px;
+    border-right: 1px dotted black;
   }
 
   .assistant .inventory {
-    width: 50%;
-    padding: 10px;
+    width: calc(50% - 20px);
+    display: inline-block;
+    vertical-align: top;
+    margin: 10px;
   }
 
   .assistant .item {
@@ -161,8 +269,24 @@ $('<style>').text(`
     overflow: hidden;
     background-repeat: no-repeat;
     background-position: center;
+    transition: 0.1s;
   }
 
+  .assistant .item:hover {
+    transform: scale(1.1);
+  }
+  
+  .assistant .item:hover div {
+    position: absolute;
+    top: 2px;
+    right: 5px;
+    width: 10px;
+    height: 10px;
+    background-color: white;
+    border-radius: 5px;
+    z-index: 3;
+  }
+  
   .assistant .item::before {
     content: attr(data-quantity);
     position: absolute;
@@ -171,11 +295,9 @@ $('<style>').text(`
     font-weight: bold;
     color: white;
     text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    z-index: 1;
   }
 
-  .assistant .item:hover::before {
-    background-color: rgba(0, 0, 0, 0.5);
-  }
 
   .assistant .item[data-queued]::after {
     content: attr(data-queued);
@@ -190,20 +312,32 @@ $('<style>').text(`
     color: white;
     line-height: 60px;
     background-color: rgba(0, 0, 0, 0.3);
+    z-index: 2;
   }
 
   .assistant .cashier div {
     position: relative;
-    border: 1px solid black;
+    border-color: black;
+    border-style: solid;
+    border-width: 1px 0;
     text-align: center;
     color: white;
+    padding: 5px 0;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
   }
 
+  .assistant .cashier span {
+    z-index: 2;
+    position: relative;
+  }
+  
   .assistant .cashier div div {
     position: absolute;
     top: 0;
     left: 0;
+    bottom: 0;
     width: 0;
     background-color: black;
+    z-index: 1;
   }
 `).appendTo('head')
