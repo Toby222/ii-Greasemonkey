@@ -15,7 +15,7 @@ class Inventory {
         href: '',
         click: e => {
           e.preventDefault()
-          this.items.forEach(item => item.clear())
+          this.items.forEach(item => item.setQueue(0))
         }
       }))
     if (type == 'sell')
@@ -36,10 +36,10 @@ class Inventory {
         let item = null
         if (type == 'sell') {
           let match = $(e).text().match(/(.+?) \(([\d,]+) available\)/)
-          item = new Item(match[1], parseInt(match[2].replace(/,/g, '')))
+          item = new Item(match[1], parseInt(match[2].replace(/,/g, '')), 'sell')
         } else {
           let match = $(e).text().match(/(.+?) \(([\d,]+) Req\)/)
-          item = new PermItem(match[1], parseInt(match[2].replace(/,/g, '')))
+          item = new Item(match[1], parseInt(match[2].replace(/,/g, '')), 'buy')
         }
         this.view.append(item.view)
         this.items.push(item)
@@ -61,84 +61,55 @@ class Inventory {
   }
 }
 
-class PermItem {
-  constructor (name, cost) {
-    this.name = name
-    this.cost = cost
-    this.queued = 0
-
-    this.view = $('<div>').addClass('trdark item')
-      .css('background-image', `url('${icons[this.name]}'`)
-      .click(() => this.queue())
-      .contextmenu(e => {
-        e.preventDefault()
-        this.queue(-1)
-      })
-  }
-
-  queue (amount) {
-    this.queued = Math.max(this.queued + (amount || 1), 0)
-
-    this.render()
-    this.listener()
-  }
-  
-  clear () {
-    this.queued = 0
-    
-    this.render()
-    this.listener()
-  }
-
-  render() {
-    this.view.attr('data-cost', this.cost)
-    if (this.queued > 0)
-      this.view.attr('data-queued', this.queued)
-    else
-      this.view.removeAttr('data-queued')
-  }
-}
-
 class Item {
-  constructor (name, quantity) {
+  constructor (name, quantity, type) {
+    this.type = type
     this.name = name
     this.quantity = quantity
     this.queued = 0
 
-    this.selectAllView = $('<div>').click(e => {
-      e.stopPropagation()
-      
-      if (this.queued == this.quantity)
-        this.clear()
-      else
-        this.queue(this.quantity)
-    })
     this.view = $('<div>').addClass('trdark item')
-      .append(this.selectAllView)
+      .append($('<div>').click(e => {
+        e.stopPropagation()
+        let amount = parseInt(prompt(`How many would you like to ${this.type}?`))
+        if (amount !== amount) return // Test for NaN
+        
+        this.setQueue(amount)
+      }).addClass('exact'))
       .css('background-image', `url('${icons[this.name]}'`)
       .click(() => this.queue())
       .contextmenu(e => {
         e.preventDefault()
         this.queue(-1)
       })
+    if (type == 'sell')
+      this.view.append(
+        $('<div>').click(e => {
+          e.stopPropagation()
+          this.setQueue(this.queued == this.quantity ? 0 : this.quantity)
+        }).addClass('all')
+      )
   }
 
   queue (amount) {
-    this.queued = Math.max(Math.min(this.queued + (amount || 1), this.quantity), 0)
+    if (this.type == 'sell')
+      this.queued = Math.max(Math.min(this.queued + (amount || 1), this.quantity), 0)
+    else
+      this.queued = Math.max(this.queued + (amount || 1), 0)
 
     this.render()
     this.listener()
   }
   
-  clear () {
-    this.queued = 0
+  setQueue (amount) {
+    this.queued = Math.max(amount, 0)
     
     this.render()
     this.listener()
   }
 
   render() {
-    this.view.attr('data-quantity', this.quantity - this.queued)
+    if (this.type == 'sell') this.view.attr('data-quantity', this.quantity - this.queued)
     if (this.queued > 0)
       this.view.attr('data-queued', this.queued)
     else
@@ -276,18 +247,28 @@ $('<style>').text(`
     transform: scale(1.1);
   }
   
-  .assistant .item:hover div {
+  .assistant .item:hover .all {
     position: absolute;
     top: 2px;
-    right: 5px;
+    right: 20px;
     width: 10px;
     height: 10px;
     background-color: white;
     border-radius: 5px;
     z-index: 3;
   }
+
+  .assistant .item:hover .exact {
+    position: absolute;
+    top: 2px;
+    right: 5px;
+    width: 10px;
+    height: 10px;
+    background-color: white;
+    z-index: 3;
+  }
   
-  .assistant .item::before {
+  .assistant .item[data-quantity]::before {
     content: attr(data-quantity);
     position: absolute;
     top: 2px;
@@ -297,7 +278,6 @@ $('<style>').text(`
     text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
     z-index: 1;
   }
-
 
   .assistant .item[data-queued]::after {
     content: attr(data-queued);
