@@ -3,6 +3,7 @@
 // @namespace   http://idioticdev.com
 // @description Alters your XP bar to show how far you could level.
 // @include     http://*improbableisland.com/*
+// @include     https://*improbableisland.com/*
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js
 // @version     1
 // @grant       none

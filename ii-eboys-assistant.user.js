@@ -3,6 +3,7 @@
 // @namespace   http://idioticdev.com
 // @description Complex batch buy and selling for eBoy's Trading Station.
 // @include     http://*improbableisland.com/runmodule.php?module=eboy*
+// @include     https://*improbableisland.com/runmodule.php?module=eboy*
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js
 // @version     3
 // @grant       none

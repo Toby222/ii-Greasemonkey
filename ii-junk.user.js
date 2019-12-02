@@ -4,8 +4,11 @@
 // @namespace   http://idioticdev.com
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js
 // @include     http://*improbableisland.com/inventory.php*
+// @include     https://*improbableisland.com/inventory.php*
 // @include     http://*improbableisland.com/badnav.php
+// @include     https://*improbableisland.com/badnav.php
 // @include     http://*improbableisland.com/runmodule.php?module=eboy*
+// @include     https://*improbableisland.com/runmodule.php?module=eboy*
 // @version     1
 // @grant       GM_setValue
 // @grant       GM_getValue

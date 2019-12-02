@@ -4,10 +4,15 @@
 // @description Solves for puzzle combat.
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js
 // @include     http://*improbableisland.com/*op=search*
+// @include     https://*improbableisland.com/*op=search*
 // @include     http://*improbableisland.com/*op=fight*
+// @include     https://*improbableisland.com/*op=fight*
 // @include     http://*improbableisland.com/*module=worldmapen*
+// @include     https://*improbableisland.com/*module=worldmapen*
 // @include     http://*improbableisland.com/badnav.php*
+// @include     https://*improbableisland.com/badnav.php*
 // @include     http://*improbableisland.com/runmodule.php?module=onslaught*
+// @include     https://*improbableisland.com/runmodule.php?module=onslaught*
 // @version     3.1
 // @grant       GM_setValue
 // @grant       GM_getValue

@@ -2,10 +2,10 @@
 // @name        ii-info-map
 // @namespace   http://redhatter.gethub.com
 // @description A map that records the places you come across, and allows you to add notes.
-// @include     http://improbableisland.com/*
-// @include     http://www.improbableisland.com/*
-// @exclude	http://improbableisland.com/forest.php*
-// @exclude	http://www.improbableisland.com/forest.php*
+// @include     http://*improbableisland.com/*
+// @include     https://*improbableisland.com/*
+// @exclude	http://*improbableisland.com/forest.php*
+// @exclude	https://*improbableisland.com/forest.php*
 // @version     1
 // ==/UserScript==
 

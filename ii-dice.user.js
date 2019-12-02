@@ -3,6 +3,7 @@
 // @namespace   http://idioticdev.com
 // @description Roll dice, flip a coin, or draw from a deck.
 // @include     http://*improbableisland.com/*
+// @include     https://*improbableisland.com/*
 // @version     1
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js
 // @grant       GM_registerMenuCommand

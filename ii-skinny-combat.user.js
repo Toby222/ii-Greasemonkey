@@ -3,9 +3,13 @@
 // @description Displays abbreviated combat text.
 // @namespace   http://idioticdev.com
 // @include     http://*improbableisland.com/*op=search*
+// @include     https://*improbableisland.com/*op=search*
 // @include     http://*improbableisland.com/*op=fight*
+// @include     https://*improbableisland.com/*op=fight*
 // @include     http://*improbableisland.com/*module=worldmapen*
+// @include     https://*improbableisland.com/*module=worldmapen*
 // @include     http://*improbableisland.com/badnav.php*
+// @include     https://*improbableisland.com/badnav.php*
 // @version     1
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js
 // @grant       GM_setValue

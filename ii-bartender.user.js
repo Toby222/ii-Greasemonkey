@@ -3,9 +3,13 @@
 // @namespace   http://RedHatter.github.com
 // @description Monitors buffs and shows an alert when they have changed.
 // @include     http://*improbableisland.com/*
+// @include     https://*improbableisland.com/*
 // @exclude     http://*improbableisland.com/runmodule.php?module=staminasystem*
+// @exclude     https://*improbableisland.com/runmodule.php?module=staminasystem*
 // @exclude     http://*improbableisland.com/bio.php?char=*
+// @exclude     https://*improbableisland.com/bio.php?char=*
 // @exclude     http://*enquirer.improbableisland.com/*
+// @exclude     https://*enquirer.improbableisland.com/*
 // @version     1.0
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js
 // @require     http://google-diff-match-patch.googlecode.com/svn/trunk/javascript/diff_match_patch.js

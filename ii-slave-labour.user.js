@@ -3,6 +3,7 @@
 // @namespace   http://RedHatter.github.com
 // @description Action automation.
 // @include     http://*improbableisland.com/*
+// @include     https://*improbableisland.com/*
 // @version     1.0
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js
 // @require     https://gist.github.com/raw/2625891/waitForKeyElements.js

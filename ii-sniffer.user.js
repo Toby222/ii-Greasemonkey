@@ -3,7 +3,9 @@
 // @namespace   http://idioticdev.com
 // @description Show sniffers range on map.
 // @include     http://*improbableisland.com/inventory.php*
+// @include     https://*improbableisland.com/inventory.php*
 // @include     http://*improbableisland.com/runmodule.php?module=worldmapen*
+// @include     https://*improbableisland.com/runmodule.php?module=worldmapen*
 // @version     3
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js
 // @grant       GM_setValue

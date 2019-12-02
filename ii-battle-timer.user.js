@@ -3,8 +3,8 @@
 // @namespace   http://RedHatter.github.com
 // @description Inserts a timer for timed commbate.
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js
-// @include     http://improbableisland.com/*
-// @include     http://www.improbableisland.com/*
+// @include     http://*improbableisland.com/*
+// @include     https://*improbableisland.com/*
 // @version     1
 // @grant       GM_setValue
 // @grant       GM_getValue

@@ -2,6 +2,7 @@
 // @name        ii-advanced-game-map
 // @namespace   http://idioticdev.com
 // @include     http://*improbableisland.com/*
+// @include     https://*improbableisland.com/*
 // @version     3
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js
 // @grant       GM_setValue
