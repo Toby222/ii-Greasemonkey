@@ -1,8 +1,8 @@
-﻿// ==UserScript==
+// ==UserScript==
 // @name        ii-puzzle-solver
 // @namespace   http://idioticdev.com
 // @description Solves for puzzle combat.
-// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js
+// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js
 // @include     http://*improbableisland.com/*op=search*
 // @include     https://*improbableisland.com/*op=search*
 // @include     http://*improbableisland.com/*op=fight*
@@ -13,11 +13,12 @@
 // @include     https://*improbableisland.com/badnav.php*
 // @include     http://*improbableisland.com/runmodule.php?module=onslaught*
 // @include     https://*improbableisland.com/runmodule.php?module=onslaught*
-// @version     4.0
+// @version     4.2
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @grant       GM_xmlhttpRequest
 // ==/UserScript==
+/*global $ */
 
 let state = ''
 let broken = ''
@@ -25,9 +26,17 @@ let zero = ''
 const inputs = []
 const details = $('<table/>')
 
-const log = () => {} // console.log //
+const log = console.log // () => {} //
 
-main()
+function _x(STR_XPATH) {
+    const xresult = document.evaluate(STR_XPATH, document, null, XPathResult.ANY_TYPE, null);
+    const xnodes = [];
+    let xres;
+    while (xres = xresult.iterateNext()) {
+        xnodes.push(xres);
+    }
+    return xnodes;
+}
 
 function main () {
   log('ii-puzzle-solver main() start')
@@ -128,13 +137,19 @@ function setup () {
 
 function findMonster () {
   log('ii-puzzle-solver findMonster() start')
-  let monster = $('span.colLtYellow')[0].textContent
 
-  // Is this theme-dependant?
-  const count = $('td.content > span > span.colLtRed').length - 1
-  if (count > 1) {
-    monster = `${monster} (x${count})`
+  const monsterElements = _x("//td[@colspan='4']")
+  monsterElements.shift()
+
+  let monster = monsterElements[0]
+    .textContent
+    .replace("*", "")
+    .replace(/^(Elite|Deadly|Lethal|Savage|Malignant|Dangerous|Malevolent) /, "")
+
+  if (monsterElements.length > 1) {
+    monster = `${monster} (x${monsterElements.length})`
   }
+  log(monster)
 
   const level = parseInt($('.content span:contains("(Level ")').text().substring(7))
 
@@ -182,7 +197,8 @@ function querySpreadsheet (query, callback) {
     url: `https://docs.google.com/spreadsheets/d/19M0BP55bQPHCodKc-KXQzC_zBKwVa5PXHUAKLvwdDaE/gviz/tq?tq=${query}`,
     onload: response => {
       callback(response)
-    }
+    },
+    onerror: console.error
   })
   log('ii-puzzle-solver querySpreadsheet end')
 }
@@ -258,3 +274,5 @@ function solve (array, test, filter) {
   log(`ii-puzzle-solver solve end [result: {${result}}]`)
   return result
 }
+
+main()
