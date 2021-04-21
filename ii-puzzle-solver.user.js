@@ -26,7 +26,7 @@ let zero = ''
 const inputs = []
 const details = $('<table/>')
 
-const log = console.log // () => {} //
+const log = () => {} // console.log //
 
 function _x(STR_XPATH) {
     const xresult = document.evaluate(STR_XPATH, document, null, XPathResult.ANY_TYPE, null);
@@ -149,7 +149,6 @@ function findMonster () {
   if (monsterElements.length > 1) {
     monster = `${monster} (x${monsterElements.length})`
   }
-  log(monster)
 
   const level = parseInt($('.content span:contains("(Level ")').text().substring(7))
 
